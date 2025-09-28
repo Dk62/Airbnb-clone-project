@@ -1,16 +1,14 @@
 <%- layout("/layouts/boilerplates") %>
     <div class="row mt-3">
         <div class="col-8 offset-2">
-            <h3> Listing Details : </h3>
+            <h3> <%= listing.title %> </h3>
         </div>
-        <div class="card col-6 offset-2 show-card">
+        <div class="card col-6 offset-2 show-card listing-card">
             <img src="<%= listing.image.url ? listing.image.url : listing.image %>" class="card-img-top show-img"
                 alt="listing_image">
             <div class="card-body ">
                 <p class="card-text">
-                    <b>
-                        <%= listing.title %>
-                    </b> <br />
+                    <br />
                     <%= listing.description %> <br />
                         &#x2089 <%= Number(listing.price || 0).toLocaleString("en-IN") %> <br>
                             <%= listing.location %> <br>
@@ -20,11 +18,56 @@
         </div>
         <br>
         <div class="btns">
-            <a href="/listings/<%= listing._id %>/edit" class="btn btn-dark col-1 offset-2 edit-btn">Edit</a>
+            <a href="/listings/<%= listing._id %>/edit" class="btn btn-dark offset-2  edit-btn">Edit</a>
             <br /> <br />
             <form method="post" action="/listings/<%= listing._id %>?_method=DELETE">
                 <button class="btn btn-dark offset-4">Delete</button>
             </form>
+        </div>
+
+        <div class="col-8 offset-2 mb-3">
+            <hr/>
+            <h4>Leave a Review</h4>
+            <form action="/listings/<%= listing._id %>/review" method="POST" class="needs-validation" novalidate>
+                <div class="mb-3 mt-3">
+                    <label for="rating" class="form-label">Rating</label>
+                    <div class="star-rating">
+                        <input type="radio" id="5-stars" name="review[rating]" value="5" required /><label for="5-stars" class="star">&#9733;</label>
+                        <input type="radio" id="4-stars" name="review[rating]" value="4" /><label for="4-stars" class="star">&#9733;</label>
+                        <input type="radio" id="3-stars" name="review[rating]" value="3" /><label for="3-stars" class="star">&#9733;</label>
+                        <input type="radio" id="2-stars" name="review[rating]" value="2" /><label for="2-stars" class="star">&#9733;</label>
+                        <input type="radio" id="1-star" name="review[rating]" value="1" /><label for="1-star" class="star">&#9733;</label>
+                    </div>
+                    <div class="invalid-feedback">Please select a rating.</div>
+                </div>
+                <div class="mb-3 mt-3">
+                    <label for="comment" class="form-label">Comment</label>
+                     <textarea name="review[comment]" id="comment" cols="30" rows="5" class="form-control" required></textarea>
+                     <div class="invalid-feedback">
+                        Please fill out a comment for your review.
+                     </div>
+                </div>
+                <button type="submit" class="btn btn-success">Submit</button>
+            </form>
+
+            <hr/>
+            <% if(listing.review && listing.review.length > 0) { %>
+            <div class="row">
+                <h4>All Reviews</h4>
+                <% for(let review of listing.review) { %>
+                    <div class="card col-5 ms-3 mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">Jane Doe</h5>
+                            <p class="card-text"><%= review.comment %></p>
+                            <p class="card-text"><%= review.rating %> stars</p>
+                            <form class="mb-3" method="POST" action="/listings/<%=listing._id%>/review/<%=review._id%>?_method=DELETE">
+                                <button class="btn btn-sm btn-dark">Delete</button>
+                            </form>
+                        </div>
+                    </div>
+                <% } %>
+            </div>
+            <% } %>
         </div>
 
     </div>

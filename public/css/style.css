@@ -59,7 +59,7 @@ body {
 
 /* cards */
 
-.card {
+.listing-card {
   border: none !important;
   margin-bottom: 2rem;
 }
@@ -109,6 +109,10 @@ body {
 
 .btns{
     display: flex;
+}
+.edit-btn{
+  height: 2.4rem;
+  width: 5.3rem;
 }
 
 .show-card {
