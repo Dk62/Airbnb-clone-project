@@ -381,7 +381,7 @@ module.exports = {
       price: 800,
       location: "Jaisalmer",
       country: "India"
-    }
+    },
   ]
 };
 module.exports = { data: sampleListings };
