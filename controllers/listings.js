@@ -24,9 +24,12 @@ module.exports.showlisting = async (req, res) => {
   };
 
 module.exports.createlisting = async (req, res, next) => {
-    listingSchema.validate(req.body);
+    let url = req.file.path;
+    let filename = req.file.filename;
+
     const newListing = new listing(req.body.listing);
     newListing.owner = req.user._id;
+    newListing.image = { url, filename };
     await newListing.save();
     req.flash("success", "Successfully made a new listing!");
     res.redirect("/listings");
@@ -35,14 +38,25 @@ module.exports.createlisting = async (req, res, next) => {
 module.exports.editlisting = async (req, res) => {
     let { id } = req.params;
     const Listing = await listing.findById(id);
-    req.flash("success", "listing edited successfully!");
-    res.render("listings/edit.ejs", { listing: Listing });
+    if (!Listing) {
+    req.flash("error", "listing you requested cannot be found!");
+    res.redirect("/listings");
+    }
+    let originalImageUrl = Listing.image.url;
+    originalImageUrl = originalImageUrl.replace("/upload", "/upload/w_250");
+    res.render("listings/edit.ejs", { listing: Listing, originalImageUrl});
   };
 
 module.exports.updatelisting = async (req, res) => {
     let { id } = req.params;
-    let foundListing = await listing.findById(id);
+
     await listing.findByIdAndUpdate(id, { ...req.body.listing });
+
+    if (typeof req.file !== "undefined") {
+      let url = req.file.path;
+      let filename = req.file.filename;
+      await listing.findByIdAndUpdate(id, { image: { url, filename } });
+    }
     req.flash("success", "Successfully updated listing!");
     res.redirect(`/listings/${id}`);
   };

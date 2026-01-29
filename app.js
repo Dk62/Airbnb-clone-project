@@ -1,3 +1,8 @@
+if (process.env.NODE_ENV !== "production") {
+    require("dotenv").config();
+};
+
+
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
@@ -53,13 +58,10 @@ app.get("/", (req,res) => {
     res.send("hii, i am root");
 });
 
-app.get("/signup", (req, res) => {
-    res.redirect("/users/signup");
-});
 
-app.get("/login", (req, res) => {
-    res.redirect("/users/login");
-});
+
+
+
 
 app.use(session(sessionOptions));
 app.use(flash());
@@ -78,29 +80,7 @@ app.use((req, res, next) => {
     next();
 });
 
-app.get("/register", (req, res) => {
-    res.render("users/register.ejs");
-});
 
-app.post("/register", async (req, res, next) => {
-    try {
-        const { email, username, password } = req.body;
-        const user = new User({ email, username });
-        const registeredUser = await User.register(user, password);
-        req.login(registeredUser, (err) => {
-            if (err) return next(err);
-            req.flash("success", "Welcome to Wanderlust!");
-            res.redirect("/listings");
-        });
-    } catch (e) {
-        req.flash("error", e.message);
-        res.redirect("/register");
-    }
-});
-
-app.get("/login", (req, res) => {
-    res.render("users/login.ejs");
-});
 
 
 

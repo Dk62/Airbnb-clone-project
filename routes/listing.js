@@ -4,35 +4,39 @@ const wrapAsync = require("../utils/wrapAsync.js");
 const ExpressError = require("../utils/ExpressError.js");
 const { listingSchema } = require("../schema.js");
 const listing = require("../models/listing.js");
-const { isLoggedIn, isOwner } = require("../middleware.js");
-const { populate } = require("../models/review.js");
+const { isLoggedIn, isOwner, validateListing } = require("../middleware.js");
+
 
 const listingcontroller = require("../controllers/listings.js");
+const multer = require("multer");
+const { storage } = require("../cloudconfig.js");
+const upload = multer({ storage});
 
-const validateListing = (req, res, next) => {
-  let { error } = listingSchema.validate(req.body);
-  if (error) {
-    let errMsg = error.details.map((el) => el.message).join(",");
-    throw new ExpressError(400, errMsg);
-  } else {
-    next();
-  }
-};
-// index route
-router.get("/", wrapAsync(listingcontroller.index));
-// new route
-router.get("/new", isLoggedIn, listingcontroller.newlistingform);
 
-// show route
-router.get("/:id", wrapAsync(listingcontroller.showlisting));
-//CREATE ROUTE
-
-router.post(
-  "/",
+router.route("/").get(wrapAsync(listingcontroller.index))
+.post(
   isLoggedIn,
+  upload.single('listing[image]'),
   validateListing,
   wrapAsync(listingcontroller.createlisting),
 );
+
+
+// new route
+router.get("/new", isLoggedIn, listingcontroller.newlistingform);
+
+router.route("/:id").get(wrapAsync(listingcontroller.showlisting)).put(
+  isLoggedIn,
+  isOwner,
+  upload.single('listing[image]'),
+  validateListing,
+  wrapAsync(listingcontroller.updatelisting),
+).delete(
+  isLoggedIn,
+  isOwner,
+  wrapAsync(listingcontroller.deletelisting),
+);
+
 
 // edit route
 router.get(
@@ -41,21 +45,6 @@ router.get(
   isOwner,
   wrapAsync(listingcontroller.editlisting),
 );
-// update route
-router.put(
-  "/:id",
-  isLoggedIn,
-  isOwner,
-  validateListing,
-  wrapAsync(listingcontroller.updatelisting),
-);
 
-//delete route
-router.delete(
-  "/:id",
-  isLoggedIn,
-  isOwner,
-  wrapAsync(listingcontroller.deletelisting),
-);
 
 module.exports = router;

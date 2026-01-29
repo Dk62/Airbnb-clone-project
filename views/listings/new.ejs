@@ -2,7 +2,7 @@
     <h2 class="address">Add your new site: </h2>
     <div class="row mt-3">
         <div class="col-8 offset-2" >
-            <form method="POST" action="/listings" novalidate  class="needs-validation">
+            <form method="POST" action="/listings" novalidate  class="needs-validation" enctype="multipart/form-data">
             <div class="mb-3">
                 <label for="title" class="form-label">Title</label>
                 <input name="listing[title]" placeholder="enter title" type="text" class="form-control" required>
@@ -13,6 +13,10 @@
                 <textarea name="listing[description]" placeholder="enter description of your site."
                     class="form-control" required></textarea>
                     <div class="invalid-feedback">please enter your discription!</div>
+            </div>
+            <div class="mb-3">
+                <label for="image" class="form-label">Upload Listing image</label>
+                <input name="listing[image]" placeholder="enter image URL/LINK" type="file" class="form-control" required/>
             </div>
             <div class="mb-3">
                 <label for="location" class="form-label">Location</label>
@@ -33,10 +37,7 @@
                         <div class="invalid-feedback">plaese enter a country name!</div>
                 </div>
             </div>
-            <div class="mb-3">
-                <label for="image" class="form-label">Image</label>
-                <input name="listing[image]" placeholder="enter image URL/LINK" type="text" class="form-control">
-            </div>
+            
             <button class="btn btn-dark add-btn mb-3">Add</button>
             </form>
         </div>

@@ -16,7 +16,7 @@ module.exports.isLoggedIn = (req, res, next) => {
 
 module.exports.saveRedirectUrl = (req, res, next) => {
     if (req.session.returnTo) {
-      res.locals.redirectUrl = req.session.redirectUrl;
+      res.locals.redirectUrl = req.session.returnTo;
     }
     next();
   
@@ -25,7 +25,7 @@ module.exports.saveRedirectUrl = (req, res, next) => {
 module.exports.isOwner = async (req, res, next) => { 
      let { id } = req.params;
     let foundListing = await listing.findById(id);
-    if (!foundListing.owner.equals(currUser._id)) {
+    if (!foundListing.owner.equals(req.user._id)) {
       req.flash("error", "You are not the owner of this listing!");
       return res.redirect(`/listings/${id}`);
     }
@@ -42,6 +42,7 @@ module.exports.validateListing = (req, res, next) => {
   }
 };
 
+
 module.exports.isReviewOwner = async (req, res, next) => { 
      let { id, reviewId } = req.params;
     let foundReview = await review.findById(reviewId);
@@ -52,4 +53,3 @@ module.exports.isReviewOwner = async (req, res, next) => {
     next();
   
 }
-
