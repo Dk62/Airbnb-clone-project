@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const review = require("./review.js");
-const { ref } = require("joi");
+const { ref, required } = require("joi");
 const Schema = mongoose.Schema;
 
 const listingSchema = new Schema({
@@ -30,6 +30,15 @@ const listingSchema = new Schema({
     type: Date,
     default: Date.now(),
   },
+  coordinates: {
+    type: [Number],
+    required: true,
+  },
+  category: {
+    type: String,
+    enum: ["mountains","arctic","farms","snow","rooms","beach"]
+  },
+
 });
 
 listingSchema.post("findOneAndDelete", async () => {

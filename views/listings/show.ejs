@@ -97,85 +97,81 @@
                         <% } %>
 
 
-                            </div>
+        </div>
 
-                            </div>
+    </div>
 
-                            <!-- Map Section -->
-                            <div class="row mt-5">
-                                <div class="col-8 offset-2">
-                                    <h3 style="margin-left: 45px;">Where You'll Be</h3>
-                                    <div id="map" style="height: 400px; width:900px ; border-radius: 8px; margin-bottom: 30px; margin-left: 45px;"></div>
-                                </div>
-                            </div>
+    <!-- Map Section -->
+    <div class="row mt-5">
+        <div class="col-8 offset-2" style="margin-left: 300px;">
+            <h3 style="margin-left: 45px;">Where You'll Be</h3>
+            <div id="map" style="height: 400px; width: 700px; border-radius: 8px; margin-bottom: 30px; margin-left: 50px;"></div>
+        </div>
+    </div>
 
-                            <!-- Leaflet CSS and JS -->
-                            <link rel="stylesheet"
-                                href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
-                            <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const starCheckboxes = document.querySelectorAll('#star-rating input[type="checkbox"]');
+            const ratingValue = document.getElementById('rating-value');
 
-                            <script>
-                                document.addEventListener('DOMContentLoaded', function () {
-                                    const starCheckboxes = document.querySelectorAll('#star-rating input[type="checkbox"]');
-                                    const ratingValue = document.getElementById('rating-value');
+            starCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function () {
+                    const selectedValue = parseInt(this.getAttribute('data-value'));
 
-                                    starCheckboxes.forEach(checkbox => {
-                                        checkbox.addEventListener('change', function () {
-                                            const selectedValue = parseInt(this.getAttribute('data-value'));
+                    // Check all stars with value less than or equal to selected
+                    starCheckboxes.forEach(cb => {
+                        if (parseInt(cb.getAttribute('data-value')) <= selectedValue && this.checked) {
+                            cb.checked = true;
+                        } else if (parseInt(cb.getAttribute('data-value')) > selectedValue) {
+                            cb.checked = false;
+                        }
+                    });
 
-                                            // Check all stars with value less than or equal to selected
-                                            starCheckboxes.forEach(cb => {
-                                                if (parseInt(cb.getAttribute('data-value')) <= selectedValue && this.checked) {
-                                                    cb.checked = true;
-                                                } else if (parseInt(cb.getAttribute('data-value')) > selectedValue) {
-                                                    cb.checked = false;
-                                                }
-                                            });
+                    // Get the highest selected rating
+                    let maxRating = 0;
+                    starCheckboxes.forEach(cb => {
+                        if (cb.checked) {
+                            maxRating = Math.max(maxRating, parseInt(cb.getAttribute('data-value')));
+                        }
+                    });
 
-                                            // Get the highest selected rating
-                                            let maxRating = 0;
-                                            starCheckboxes.forEach(cb => {
-                                                if (cb.checked) {
-                                                    maxRating = Math.max(maxRating, parseInt(cb.getAttribute('data-value')));
-                                                }
-                                            });
+                    // Set the hidden input value
+                    ratingValue.value = maxRating;
+                });
+            });
+        });
 
-                                            // Set the hidden input value
-                                            ratingValue.value = maxRating;
-                                        });
-                                    });
-                                });
+        // Initialize Leaflet Map
+        document.addEventListener('DOMContentLoaded', function () {
+            setTimeout(() => {
+                const map = L.map('map').setView([19.0760, 72.8777], 13);
 
-                                // Initialize Leaflet Map
-                                document.addEventListener('DOMContentLoaded', function () {
-                                    setTimeout(() => {
-                                        const map = L.map('map').setView([19.0760, 72.8777], 13);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                    maxZoom: 19
+                }).addTo(map);
 
-                                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                                            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-                                            maxZoom: 19
-                                        }).addTo(map);
+                const location = `<%= listing.location %>, <%= listing.country %>`;
 
-                                        const location = `<%= listing.location %>, <%= listing.country %>`;
+                if (location && location.trim() && location !== ",") {
+                    fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(location)}&format=json`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.length > 0) {
+                                const place = data[0];
+                                const lat = parseFloat(place.lat);
+                                const lon = parseFloat(place.lon);
 
-                                        if (location && location.trim() && location !== ",") {
-                                            fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(location)}&format=json`)
-                                                .then(response => response.json())
-                                                .then(data => {
-                                                    if (data.length > 0) {
-                                                        const place = data[0];
-                                                        const lat = parseFloat(place.lat);
-                                                        const lon = parseFloat(place.lon);
+                                map.setView([lat, lon], 13);
 
-                                                        map.setView([lat, lon], 13);
-
-                                                        L.marker([lat, lon]).addTo(map)
-                                                            .bindPopup(`<b><%= listing.title %></b><br/>Location: ${location}`)
-                                                            .openPopup();
-                                                    }
-                                                })
-                                                .catch(error => console.log('Geocoding error:', error));
-                                        }
-                                    }, 100);
-                                });
-                            </script>
+                                L.marker([lat, lon]).addTo(map)
+                                    .bindPopup(`<b><%= listing.title %></b><br/>Location: ${location}`)
+                                    .openPopup();
+                            }
+                        })
+                        .catch(error => console.log('Geocoding error:', error));
+                }
+            }, 100);
+        });
+    </script>
